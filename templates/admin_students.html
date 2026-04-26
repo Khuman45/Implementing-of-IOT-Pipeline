@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block topbar_title %}Students{% endblock %}
+{% block content %}
+<div class="section-header">
+ <div><div class="section-title">Students</div><div class="section-sub">{{ total }} total</div></div>
+</div>
+<div class="toolbar">
+ <form method="GET" style="display:contents;">
+ <div class="search-wrap"><span class="search-icon"></span><input type="text" name="q" value="{{ search }}" placeholder="Search name or email…"></div>
+ <div class="filter-tabs">
+ <a href="?status=all&q={{ search }}" class="filter-tab {% if filter_status=='all' %}active{% endif %}">All</a>
+ <a href="?status=pending&q={{ search }}" class="filter-tab {% if filter_status=='pending' %}active{% endif %}">Pending</a>
+ <a href="?status=approved&q={{ search }}" class="filter-tab {% if filter_status=='approved' %}active{% endif %}">Approved</a>
+ <a href="?status=suspended&q={{ search }}" class="filter-tab {% if filter_status=='suspended' %}active{% endif %}">Suspended</a>
+ </div>
+ <button type="submit" class="btn btn-outline btn-sm">Search</button>
+ </form>
+</div>
+<form method="POST" action="/admin/bulk_approve">
+<div class="table-wrap"><table>
+ <thead><tr><th><input type="checkbox" id="chkAll" onclick="document.querySelectorAll('[name=student_ids]').forEach(c=>c.checked=this.checked)"></th><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+ <tbody>
+ {% for s in students %}
+ <tr>
+ <td>{% if s['approved']==0 and s['suspended']==0 %}<input type="checkbox" name="student_ids" value="{{ s['id'] }}">{% endif %}</td>
+ <td><strong>{{ s['name'] }}</strong></td>
+ <td class="td-muted">{{ s['email'] }}</td>
+ <td class="td-muted">{{ s['phone'] or '—' }}</td>
+ <td>
+ {% if s['suspended']==1 %}<span class="badge badge-suspended">Suspended</span>
+ {% elif s['approved']==1 %}<span class="badge badge-approved">Approved</span>
+ {% else %}<span class="badge badge-pending">Pending</span>{% endif %}
+ </td>
+ <td class="td-muted">{{ s['created_at'][:10] if s['created_at'] else '—' }}</td>
+ <td><div class="btn-group">
+ {% if s['approved']==0 and s['suspended']==0 %}
+ <a href="/admin/approve_student/{{ s['id'] }}" class="btn btn-success btn-xs">Approve</a>
+ <a href="/admin/reject_student/{{ s['id'] }}" class="btn btn-danger btn-xs" onclick="return confirm('Delete student?')">Reject</a>
+ {% elif s['suspended']==1 %}
+ <a href="/admin/unsuspend_student/{{ s['id'] }}" class="btn btn-outline btn-xs">Unsuspend</a>
+ {% else %}
+ <a href="/admin/suspend_student/{{ s['id'] }}" class="btn btn-danger btn-xs">Suspend</a>
+ {% endif %}
+ </div></td>
+ </tr>
+ {% else %}
+ <tr><td colspan="7"><div class="empty-state"><div class="empty-icon"></div><div class="empty-title">No students found</div></div></td></tr>
+ {% endfor %}
+ </tbody>
+</table></div>
+<div style="margin-top:14px;display:flex;align-items:center;gap:10px;">
+{% if filter_status == "pending" or filter_status == "all" %}
+ <button type="submit" class="btn btn-success btn-sm">Bulk Approve Selected</button>
+ <span style="font-size:13px;color:var(--text3);">Select pending students above</span>
+{% endif %}
+</div>
+</form>
+{% if pages > 1 %}<div class="pagination">{% for p in range(1,pages+1) %}<a href="?page={{ p }}&q={{ search }}&status={{ filter_status }}" class="page-link {% if p==page %}active{% endif %}">{{ p }}</a>{% endfor %}</div>{% endif %}
+{% endblock %}

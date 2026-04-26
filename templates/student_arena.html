@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Research Arena{% endblock %}
+{% block topbar_title %}Research Arena{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div class="section-title">Research Arena</div>
+  <div class="section-sub">Browse challenges and submit your proposals</div>
+</div>
+{% for challenge in challenges %}
+<div class="card" style="margin-bottom:24px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+    <div class="card-title">{{ challenge.title }}</div>
+    <span class="badge badge-review">{{ challenge.deadline or "No deadline" }}</span>
+  </div>
+  <div style="font-size:14px;color:var(--text2);margin-bottom:12px;">{{ challenge.description }}</div>
+  {% if challenge.skills %}
+  <div style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px;">
+    {% for s in challenge.skills.split(",") %}
+      <span style="background:var(--glow);color:var(--accent2);border:1px solid rgba(124,106,255,0.2);padding:2px 10px;border-radius:99px;font-size:12px;">{{ s.strip() }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if challenge.my_proposal %}
+  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px;">
+    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">Your Proposal</div>
+    <div style="font-size:14px;color:var(--text);margin-bottom:12px;">{{ challenge.my_proposal.content }}</div>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="font-size:24px;font-weight:800;color:{% if challenge.my_proposal.ml_score >= 70 %}var(--green){% elif challenge.my_proposal.ml_score >= 40 %}var(--amber){% else %}var(--red){% endif %};">
+        {% if challenge.my_proposal.ml_score >= 70 %}Strong{% elif challenge.my_proposal.ml_score >= 40 %}Average{% else %}Weak{% endif %}
+      </div>
+      <div>
+        <div style="font-size:13px;color:var(--text3);">ML Score: {{ challenge.my_proposal.ml_score }}/100</div>
+        <div style="font-size:12px;color:var(--text3);">Keywords: {{ challenge.my_proposal.ml_keywords_matched }} of {{ challenge.my_proposal.ml_keywords_total }} matched</div>
+      </div>
+      <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        {% if challenge.my_proposal.status == "active" %}
+          <span class="badge badge-approved">Active</span>
+        {% elif challenge.my_proposal.status == "declined" %}
+          <span class="badge badge-rejected">Declined</span>
+        {% elif challenge.my_proposal.status == "approved" %}
+          <span class="badge badge-approved">Approved</span>
+        {% elif challenge.my_proposal.status == "rejected" %}
+          <span class="badge badge-rejected">Rejected</span>
+        {% else %}
+          <span class="badge badge-pending">Pending Review</span>
+        {% endif %}
+        {% if challenge.my_proposal.status == "approved" and not challenge.my_proposal.student_response %}
+          {% if challenge.my_proposal.admin_message %}
+          <div style="font-size:13px;color:var(--text2);margin-top:8px;padding:10px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border);">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Message from Admin:</div>
+            {{ challenge.my_proposal.admin_message }}
+          </div>
+          {% endif %}
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <a href="/student/arena/accept/{{ challenge.my_proposal.id }}" class="btn btn-success btn-sm">Accept</a>
+            <a href="/student/arena/decline/{{ challenge.my_proposal.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to decline?')">Decline</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <form method="POST" action="/student/arena/submit">
+    <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+    <div class="form-group">
+      <label class="form-label">Write Your Proposal</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <button type="button" class="btn btn-outline btn-xs" id="btn1_{{ challenge.id }}">Research Template</button>
+        <button type="button" class="btn btn-outline btn-xs" id="btn2_{{ challenge.id }}">Technical Template</button>
+        <button type="button" class="btn btn-outline btn-xs" id="btn3_{{ challenge.id }}">Problem-Solving Template</button>
+      </div>
+      <textarea name="content" id="ta_{{ challenge.id }}" placeholder="Click a template or write your own..." required style="min-height:160px;width:100%;"></textarea>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px;">Tip: Use a template then personalise it to score higher</div>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit Proposal</button>
+    <script>
+      (function() {
+        var id = {{ challenge.id }};
+        var skills = {{ challenge.skills | tojson }};
+        var title = {{ challenge.title | tojson }};
+        function fill(type) {
+          var sl = skills ? skills.split(",").map(function(s){return s.trim();}) : [];
+          var s1 = sl[0] || "relevant technologies";
+          var s2 = sl[1] || "appropriate methods";
+          var s3 = sl[2] || "data analysis";
+          var ss = sl.join(", ");
+          var t = "";
+          if (type === 1) t = "I propose to research and analyse " + title + " using " + ss + ". My research approach involves studying existing solutions and identifying gaps in current methodologies. I will develop a systematic research plan using " + s1 + " to gather and analyse data. The objective is to evaluate findings and propose evidence-based improvements. Through research and analysis I aim to contribute meaningful insights that address the core challenges of this project.";
+          else if (type === 2) t = "I will design and implement a technical solution for " + title + " using " + ss + ". My approach involves breaking down the problem into clear technical components and implementing each using " + s1 + " and " + s2 + ". I will build a working prototype, test it against requirements, and evaluate performance. The solution will be developed iteratively with each phase reviewed against the project objectives. I will use " + s3 + " to validate results.";
+          else t = "The objective of this proposal is to solve the key challenges in " + title + ". Using " + ss + ", I plan to identify root causes and develop an effective solution. My approach involves analysing the current situation, designing an improvement strategy using " + s1 + ", and implementing it using " + s2 + ". I will evaluate outcomes and measure success against defined criteria. This solution will help improve efficiency and deliver meaningful results for target users.";
+          document.getElementById("ta_" + id).value = t;
+        }
+        document.getElementById("btn1_" + id).onclick = function(){ fill(1); };
+        document.getElementById("btn2_" + id).onclick = function(){ fill(2); };
+        document.getElementById("btn3_" + id).onclick = function(){ fill(3); };
+      })();
+    </script>
+  </form>
+  {% endif %}
+</div>
+{% else %}
+<div class="empty-state"><div class="empty-title">No challenges posted yet</div></div>
+{% endfor %}
+{% endblock %}

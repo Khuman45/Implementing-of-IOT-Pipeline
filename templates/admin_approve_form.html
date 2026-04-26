@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Approve Proposal{% endblock %}
+{% block topbar_title %}Approve Proposal{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div class="section-title">Approve Proposal</div>
+  <a href="/admin/arena" class="btn btn-outline btn-sm">Back</a>
+</div>
+<div class="card">
+  <div style="margin-bottom:20px;padding:16px;background:var(--bg3);border-radius:var(--r-sm);">
+    <div style="font-weight:600;font-size:15px;">{{ p.student_name }}</div>
+    <div style="font-size:13px;color:var(--text3);">{{ p.challenge_title }}</div>
+    <div style="font-size:14px;color:var(--text2);margin-top:8px;">{{ p.content[:200] }}...</div>
+  </div>
+  <form method="POST">
+    <div class="form-group">
+      <label class="form-label">Message to Student</label>
+      <textarea name="message" placeholder="e.g. Well done! Your proposal has been selected. Please confirm your participation by accepting below." style="min-height:120px;">Well done! Your proposal has been selected for {{ p.challenge_title }}. Please accept to confirm your participation.</textarea>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px;">Student will see this message and can Accept or Decline.</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button type="submit" class="btn btn-success">Approve & Send Message</button>
+      <a href="/admin/arena" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

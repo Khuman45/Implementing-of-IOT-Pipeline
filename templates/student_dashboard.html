@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <div class="section-title">Welcome back, {{ session['name'] }}</div>
+    <div class="section-sub">Here is your CollabX RDI overview</div>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-num">{{ challenges_count }}</div>
+    <div class="stat-label">Open Challenges</div>
+    <div class="stat-sub"><a href="/student/arena" style="color:var(--accent2);">Go to Research Arena →</a></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ my_proposals }}</div>
+    <div class="stat-label">My Proposals</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ approved_proposals }}</div>
+    <div class="stat-label">Approved</div>
+  </div>
+</div>
+
+{% if recent_proposals %}
+<div class="card">
+  <div class="card-title">Recent Proposals</div>
+  <table class="table-wrap" style="width:100%;border-collapse:collapse;">
+    <thead><tr>
+      <th style="padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase;background:var(--bg3);text-align:left;">Challenge</th>
+      <th style="padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase;background:var(--bg3);text-align:left;">ML Score</th>
+      <th style="padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase;background:var(--bg3);text-align:left;">Status</th>
+    </tr></thead>
+    <tbody>
+    {% for p in recent_proposals %}
+      <tr style="border-top:1px solid var(--border);">
+        <td style="padding:12px 14px;">{{ p.challenge_title }}</td>
+        <td style="padding:12px 14px;">
+          {% if p.ml_score is defined and p.ml_score %}
+            <span style="font-weight:700;color:{% if p.ml_score >= 70 %}var(--green){% elif p.ml_score >= 40 %}var(--amber){% else %}var(--red){% endif %};">
+              {% if p.ml_score >= 70 %}Strong{% elif p.ml_score >= 40 %}Average{% else %}Weak{% endif %}
+              ({{ p.ml_score }}/100)
+            </span>
+          {% else %}—{% endif %}
+        </td>
+        <td style="padding:12px 14px;">
+          {% if p.status == 'approved' %}<span class="badge badge-approved">Approved</span>
+          {% elif p.status == 'rejected' %}<span class="badge badge-rejected">Rejected</span>
+          {% else %}<span class="badge badge-pending">Pending</span>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div style="margin-top:14px;">
+    <a href="/student/arena" class="btn btn-primary btn-sm">Go to Research Arena</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

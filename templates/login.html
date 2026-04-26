@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CollabX — Login</title><link rel="stylesheet" href="/static/style.css"></head>
+<body class="auth-body">
+<div class="auth-card">
+ <div class="auth-logo">CollabX</div>
+ <div class="auth-subtitle">Research · Development · Innovation</div>
+ <h2>Welcome back</h2>
+ {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+ {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
+ <form method="POST" action="/login">
+ <div class="form-group"><label class="form-label">Email address</label><input type="email" name="email" placeholder="you@example.com" required></div>
+ <div class="form-group"><label class="form-label">Password</label><input type="password" name="password" placeholder="••••••••" required></div>
+ <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;">Sign In &rarr;</button>
+ </form>
+ <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text3);">New student? <a href="/register" style="color:var(--accent2);">Register here</a></p>
+</div></body></html>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+{% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>{% endblock %}
+{% block content %}
+<div class="stat-grid">
+ <div class="stat-card"><div class="stat-icon"></div><div class="stat-num">{{ stats.students }}</div><div class="stat-label">Total Students</div><div class="stat-sub">{{ stats.pending }} pending approval</div></div>
+ <div class="stat-card"><div class="stat-icon"></div><div class="stat-num">{{ stats.challenges }}</div><div class="stat-label">Challenges</div></div>
+ <div class="stat-card"><div class="stat-icon"></div><div class="stat-num">{{ stats.proposals }}</div><div class="stat-label">Proposals</div><div class="stat-sub">{{ stats.approved_proposals }} approved</div></div>
+ <div class="stat-card"><div class="stat-icon"></div><div class="stat-num">{{ stats.recruitment }}</div><div class="stat-label">Job Posts</div></div>
+</div>
+<div class="grid-2" style="margin-bottom:24px;">
+ <div class="chart-box"><div class="chart-title">Proposals by Status</div><canvas id="statusChart" height="220"></canvas></div>
+ <div class="chart-box"><div class="chart-title">Top Challenges by Proposals</div><canvas id="challengeChart" height="220"></canvas></div>
+</div>
+<div class="card"><div class="card-title">Recent Activity</div>
+ {% for a in recent_activity %}
+ <div class="activity-item">
+ <div class="activity-icon"></div>
+ <div><div style="font-size:14px;font-weight:500;color:var(--text);">{{ a['action'].replace('_',' ').title() }}</div>
+ <div style="font-size:13px;color:var(--text2);">{{ a['details'] }}</div>
+ <div style="font-size:12px;color:var(--text3);">{{ a['created_at'] }}</div></div>
+ </div>
+ {% else %}<div class="empty-state" style="padding:30px 0;"><div class="empty-icon"></div><div class="empty-title">No activity yet</div></div>
+ {% endfor %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+Chart.defaults.color='#9898b8';Chart.defaults.borderColor='rgba(255,255,255,0.07)';
+const sL=[{% for s in statuses %}'{{ s["status"] }}',{% endfor %}];
+const sD=[{% for s in statuses %}{{ s["cnt"] }},{% endfor %}];
+new Chart(document.getElementById('statusChart'),{type:'doughnut',data:{labels:sL,datasets:[{data:sD,backgroundColor:['#fbbf24','#38bdf8','#22d3a0','#ff5e7d','#a78bfa'],borderWidth:0}]},options:{plugins:{legend:{position:'bottom',labels:{padding:16,font:{size:13}}}}}});
+const cL=[{% for c in top_challenges %}'{{ c["title"][:18] }}',{% endfor %}];
+const cD=[{% for c in top_challenges %}{{ c["cnt"] }},{% endfor %}];
+new Chart(document.getElementById('challengeChart'),{type:'bar',data:{labels:cL,datasets:[{label:'Proposals',data:cD,backgroundColor:'rgba(124,106,255,0.7)',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{maxRotation:30}},y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+</script>{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Activity Log{% endblock %}
+{% block topbar_title %}Activity Log{% endblock %}
+{% block content %}
+<div class="section-header"><div><div class="section-title">Activity Log</div><div class="section-sub">Full system history</div></div></div>
+<div class="card">
+ {% for log in logs %}
+ <div class="activity-item">
+ <div class="activity-icon"></div>
+ <div>
+ <div style="font-size:14px;font-weight:500;color:var(--text);">{{ log['action'].replace('_',' ').title() }}</div>
+ <div style="font-size:13px;color:var(--text2);">{{ log['details'] or '—' }} {% if log['name'] %}· by <strong>{{ log['name'] }}</strong>{% endif %}</div>
+ <div style="font-size:12px;color:var(--text3);">{{ log['created_at'] }}</div>
+ </div>
+ </div>
+ {% else %}<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">No activity yet</div></div>{% endfor %}
+</div>
+{% if pages > 1 %}<div class="pagination">{% for p in range(1,pages+1) %}<a href="?page={{ p }}" class="page-link {% if p==page %}active{% endif %}">{{ p }}</a>{% endfor %}</div>{% endif %}
+{% endblock %}

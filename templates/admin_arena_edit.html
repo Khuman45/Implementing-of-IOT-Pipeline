@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Edit Challenge{% endblock %}
+{% block topbar_title %}Edit Challenge{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div class="section-title">Edit Challenge</div>
+  <a href="/admin/arena" class="btn btn-outline btn-sm">Back</a>
+</div>
+<div class="card">
+  <form method="POST">
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input type="text" name="title" value="{{ challenge.title }}" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea name="description" required>{{ challenge.description }}</textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Required Skills</label>
+        <input type="text" name="skills" value="{{ challenge.skills or '' }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deadline</label>
+        <input type="date" name="deadline" value="{{ challenge.deadline or '' }}">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+  </form>
+</div>
+{% endblock %}

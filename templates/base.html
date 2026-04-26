@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>CollabX &mdash; {% block title %}{% endblock %}</title>
+ <link rel="stylesheet" href="/static/style.css">
+ {% block head %}{% endblock %}
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="layout">
+ <aside class="sidebar" id="sidebar">
+ <div class="sidebar-logo">
+ <div class="logo-text">CollabX</div>
+ <div class="logo-sub">RDI Platform</div>
+ </div>
+ <div class="sidebar-user">
+ <div class="avatar">{{ session['name'][0].upper() }}</div>
+ <div>
+ <div class="user-name">{{ session['name'] }}</div>
+ <div class="user-role-tag">{{ session['role'] }}</div>
+ </div>
+ </div>
+ <nav class="sidebar-nav">
+ {% if session['role'] == 'admin' %}
+ <div class="nav-section">Overview</div>
+ <a href="/admin/dashboard" class="nav-link {% if request.path=='/admin/dashboard' %}active{% endif %}">Dashboard</a>
+ <div class="nav-section">Manage</div>
+ <a href="/admin/students" class="nav-link {% if '/admin/students' in request.path %}active{% endif %}">Students</a>
+ <a href="/admin/arena" class="nav-link {% if '/admin/arena' in request.path %}active{% endif %}">Research Arena</a>
+ <div class="nav-section">System</div>
+ <a href="/admin/activity" class="nav-link {% if '/admin/activity' in request.path %}active{% endif %}">Activity Log</a>
+ <a href="/notifications" class="nav-link {% if request.path=='/notifications' %}active{% endif %}">Notifications {% if unread_count > 0 %}<span class="badge">{{ unread_count }}</span>{% endif %}</a>
+ {% else %}
+ <div class="nav-section">Overview</div>
+ <a href="/student/dashboard" class="nav-link {% if request.path=='/student/dashboard' %}active{% endif %}">Dashboard</a>
+ <div class="nav-section">Explore</div>
+ <a href="/student/arena" class="nav-link {% if '/student/arena' in request.path %}active{% endif %}">Research Arena</a>
+ <a href="/student/skills" class="nav-link {% if '/student/skills' in request.path %}active{% endif %}">My Skills</a>
+ <div class="nav-section">System</div>
+ <a href="/student/activity" class="nav-link {% if '/student/activity' in request.path %}active{% endif %}">Activity Log</a>
+ <a href="/notifications" class="nav-link {% if request.path=='/notifications' %}active{% endif %}">Notifications {% if unread_count > 0 %}<span class="badge">{{ unread_count }}</span>{% endif %}</a>
+ {% endif %}
+ </nav>
+ <div class="sidebar-footer">
+ <a href="/logout" class="nav-link">Logout</a>
+ </div>
+ </aside>
+ <div class="main">
+ <header class="topbar">
+ <div style="display:flex;align-items:center;gap:12px;">
+ <button class="hamburger" onclick="openSidebar()">&#9776;</button>
+ <span class="topbar-title">{% block topbar_title %}{% endblock %}</span>
+ </div>
+ <div class="topbar-right">
+ <a href="/notifications" class="notif-btn" title="Notifications">
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+ {% if unread_count > 0 %}<span class="notif-dot"></span>{% endif %}
+ </a>
+ </div>
+ </header>
+ <div class="page-content">{% block content %}{% endblock %}</div>
+ </div>
+</div>
+<script>
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('show')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
+</script>
+{% block scripts %}{% endblock %}
+</body></html>

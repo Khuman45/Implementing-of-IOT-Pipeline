@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}My Skills{% endblock %}
+{% block topbar_title %}My Skills{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div class="section-title">My Skills</div>
+  <div class="section-sub">Manage your skills — LinkedIn style</div>
+</div>
+
+<!-- PROFILE COMPLETENESS -->
+<div class="card" style="margin-bottom:24px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div style="font-size:14px;font-weight:600;color:var(--text);">Profile Completeness</div>
+    <div style="font-size:14px;font-weight:700;color:var(--accent2);">{{ completeness }}%</div>
+  </div>
+  <div style="background:var(--bg3);border-radius:99px;height:10px;overflow:hidden;">
+    <div style="width:{{ completeness }}%;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .5s;"></div>
+  </div>
+  <div style="font-size:12px;color:var(--text3);margin-top:8px;">{{ completeness_msg }}</div>
+</div>
+
+<!-- STATS -->
+<div class="stat-grid" style="margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--accent2);">{{ skills|length }}</div>
+    <div class="stat-label">Skills Added</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--green);">{{ matched_challenges }}</div>
+    <div class="stat-label">Challenges Matched</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--amber);">{{ total_challenges }}</div>
+    <div class="stat-label">Total Challenges</div>
+  </div>
+</div>
+
+<!-- ADD SKILL -->
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-title">Add a Skill</div>
+  <form method="POST" action="/student/skills/add" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+    <div style="flex:2;min-width:200px;">
+      <label style="font-size:12px;color:var(--text3);margin-bottom:4px;display:block;">Skill Name</label>
+      <input type="text" name="skill_name" placeholder="e.g. Python, Machine Learning" required>
+    </div>
+    <div style="flex:1;min-width:150px;">
+      <label style="font-size:12px;color:var(--text3);margin-bottom:4px;display:block;">Level</label>
+      <select name="skill_level">
+        <option value="Beginner">Beginner</option>
+        <option value="Intermediate" selected>Intermediate</option>
+        <option value="Advanced">Advanced</option>
+        <option value="Expert">Expert</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Skill</button>
+  </form>
+
+  {% if top_recommended %}
+  <div style="margin-top:16px;">
+    <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Quick add from challenges:</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      {% for skill, count in top_recommended %}
+        <a href="/student/skills/quickadd/{{ skill }}" style="background:rgba(124,106,255,0.1);color:var(--accent2);border:1px solid rgba(124,106,255,0.3);padding:4px 12px;border-radius:99px;font-size:12px;text-decoration:none;">+ {{ skill }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- MY SKILLS LIST -->
+{% if skills %}
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-title">My Skills ({{ skills|length }})</div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    {% for s in skills %}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--glow);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--accent2);">{{ s.skill_name[0].upper() }}</div>
+        <div>
+          <div style="font-weight:600;font-size:15px;color:var(--text);">{{ s.skill_name }}</div>
+          <div style="font-size:12px;margin-top:2px;
+            color:{% if s.skill_level == 'Expert' %}var(--green){% elif s.skill_level == 'Advanced' %}var(--accent2){% elif s.skill_level == 'Intermediate' %}var(--amber){% else %}var(--text3){% endif %};">
+            {{ s.skill_level }}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <form method="POST" action="/student/skills/edit/{{ s.id }}" style="display:inline;">
+          <select name="skill_level" onchange="this.form.submit()" style="width:130px;font-size:13px;padding:5px 10px;">
+            <option value="Beginner" {% if s.skill_level=='Beginner' %}selected{% endif %}>Beginner</option>
+            <option value="Intermediate" {% if s.skill_level=='Intermediate' %}selected{% endif %}>Intermediate</option>
+            <option value="Advanced" {% if s.skill_level=='Advanced' %}selected{% endif %}>Advanced</option>
+            <option value="Expert" {% if s.skill_level=='Expert' %}selected{% endif %}>Expert</option>
+          </select>
+        </form>
+        <a href="/student/skills/delete/{{ s.id }}" onclick="return confirm('Remove {{ s.skill_name }}?')" class="btn btn-danger btn-sm">Remove</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- SKILL GAP -->
+{% if missing_skills %}
+<div class="card" style="border-left:4px solid var(--amber);">
+  <div class="card-title">Skill Gap Analysis</div>
+  <p style="font-size:14px;color:var(--text2);margin-bottom:16px;">Skills missing from your profile that appear most in active challenges:</p>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    {% for skill, count in missing_skills %}
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="min-width:160px;font-size:14px;color:var(--text);text-transform:capitalize;">{{ skill }}</div>
+      <div style="flex:1;background:var(--bg3);border-radius:99px;height:8px;overflow:hidden;">
+        <div style="width:{{ [count * 20, 100]|min }}%;height:100%;background:var(--amber);border-radius:99px;"></div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);min-width:80px;">{{ count }} challenge{{ 's' if count != 1 else '' }}</div>
+      <a href="/student/skills/quickadd/{{ skill }}" class="btn btn-sm" style="font-size:11px;padding:3px 10px;">+ Add</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
