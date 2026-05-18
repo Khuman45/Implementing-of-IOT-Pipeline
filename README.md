@@ -1,1 +1,0 @@
-# Implementing-of-IOT-Pipeline
