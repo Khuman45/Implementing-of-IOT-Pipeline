@@ -146,7 +146,7 @@ Each proposal is automatically scored out of 100 when submitted:
 3. Commit your changes: `git commit -m "Add your feature"`
 4. Push to the branch: `git push origin feature/your-feature`
 5. Open a Pull Request
-
+ Khuman Singh Rana
 ---
 
 
